@@ -1,372 +1,258 @@
-//<editor-fold>
+
+const List = Immutable.List;
+const Map=Immutable.Map;
+
+//operations on squares
+let SW = false;
+const GenerateRandomGrid = (dimX, dimY, deathtol) => {
+    let tmpArr = [];
+    for (let i = 0; i < dimX; i++)
+        for (let j = 0; j < dimY; j++)
+            if (_.random(0, 100) <= deathtol)
+
+                tmpArr.push("\{" +
+                    "row:" + i + "," + "col:" + j + "\}");
+
+    return List(tmpArr);
+}
+const randomGrid_30x50 = GenerateRandomGrid(30, 50, 10); //start with a grid 10% alive
+
+
+const sqrToarray = (sqr) => {
+    let tmp = sqr.split(",");
+
+    tmp[0] = parseInt(tmp[0].slice(5));
+    tmp[1] = parseInt(tmp[1].slice(4).slice(0, -1));
+    return tmp;
+};
+// get list with nearest squares
 const getSquareneighbors = (sqr, row, col) => {
+    row = row - 1;
+    col = col - 1
+
     if (sqr[0] == row) {
         if (sqr[1] == col)
-            return (new[
-                [
-                    sqr[0], 0
-                ],
-                [
-                    sqr[0] - 1,
-                    0
-                ],
-                [
-                    sqr[0] - 2,
-                    0
-                ],
-                [
-                    sqr[0], 1
-                ],
-                [
-                    sqr[0], 2
-                ],
-                [
-                    sqr[0] - 1,
-                    col
-                ],
-                [
-                    sqr[0] - 1,
-                    col - 1
-                ],
-                [
-                    sqr[0], col - 1
-                ]
+            return ([
+                "\{row:" + row + ",col:" + 0 + "\}",
+                "\{row:" + (row - 1) + ",col:" + 0 + "\}",
+                "\{row:" + (row - 2) + ",col:" + 0 + "\}",
+                "\{row:" + row + ",col:" + 1 + "\}",
+                "\{row:" + row + ",col:" + 2 + "\}",
+                "\{row:" + (row - 1) + ",col:" + col + "\}",
+                "\{row:" + (row - 1) + ",col:" + (col - 1) + "\}",
+                "\{row:" + row + ",col:" + (col - 1) + "\}"
             ])
         else if (sqr[1] == 0)
-            return new([
-                [
-                    row, 1
-                ],
-                [
-                    row - 1,
-                    1
-                ],
-                [
-                    row - 1,
-                    0
-                ],
-                [
-                    row, col
-                ],
-                [
-                    row - 1,
-                    col
-                ],
-                [
-                    row - 2,
-                    col
-                ],
-                [
-                    row, col - 1
-                ],
-                [
-                    row, col - 2
-                ]
+            return ([
+                "\{row:" + row + ",col:" + 1 + "\}",
+                "\{row:" + (row - 1) + ",col:" + 1 + "\}",
+                "\{row:" + (row - 1) + ",col:" + 0 + "\}",
+                "\{row:" + row + ",col:" + col + "\}",
+                "\{row:" + (row - 1) + ",col:" + col + "\}",
+                "\{row:" + (row - 2) + ",col:" + col + "\}",
+                "\{row:" + row + ",col:" + (col - 1) + "\}",
+                "\{row:" + row + ",col:" + (col - 2) + "\}"
 
             ]);
-
-else
+        else
             return ([
-                [
-                    row - 1,
-                    sqr[1] - 1
-                ],
-                [
-                    row - 1,
-                    sqr[1]
-                ],
-                [
-                    row - 1,
-                    sqr[1] + 1
-                ],
-                [
-                    row, sqr[1] - 1
-                ],
-                [
-                    row, sqr[1] + 1
-                ],
-                [
-                    0, sqr[1] - 1
-                ],
-                [
-                    0, sqr[1]
-                ],
-                [
-                    0, sqr[1] + 1
-                ]
+                "\{row:" + (row - 1) + ",col:" + (sqr[1] - 1) + "\}",
+                "\{row:" + (row - 1) + ",col:" + sqr[1] + "\}",
+                "\{row:" + (row - 1) + ",col:" + (sqr[1] + 1) + "\}",
+                "\{row:" + row + ",col:" + (sqr[1] - 1) + "\}",
+                "\{row:" + row + ",col:" + (sqr[1] + 1) + "\}",
+                "\{row:" + 0 + ",col:" + (sqr[1] - 1) + "\}",
+                "\{row:" + 0 + ",col:" + sqr[1] + "\}",
+                "\{row:" + 0 + ",col:" + (sqr[1] + 1) + "\}"
             ]);
         }
 
     if (sqr[0] == 0) {
         if (sqr[1] == col)
             return ([
-                [
-                    1, col
-                ],
-                [
-                    1, col - 1
-                ],
-                [
-                    0, col - 1
-                ],
-                [
-                    0, 0
-                ],
-                [
-                    0, 1
-                ],
-                [
-                    0, 2
-                ],
-                [
-                    1, 0
-                ],
-                [2, 0]
+                "\{row:" + 1 + ",col:" + col + "\}",
+                "\{row:" + 1 + ",col:" + (col - 1) + "\}",
+                "\{row:" + 0 + ",col:" + (col - 1) + "\}",
+                "\{row:" + 0 + ",col:" + 0 + "\}",
+                "\{row:" + 0 + ",col:" + 1 + "\}",
+                "\{row:" + 0 + ",col:" + 2 + "\}",
+                "\{row:" + 1 + ",col:" + 0 + "\}",
+                "\{row:" + 2 + ",col:" + 0 + "\}"
             ]);
         else if (sqr[1] == 0)
             return ([
-                [
-                    0, 1
-                ],
-                [
-                    1, 0
-                ],
-                [
-                    1, 1
-                ],
-                [
-                    0, col
-                ],
-                [
-                    0, col - 1
-                ],
-                [
-                    0, col - 2
-                ],
-                [
-                    1, col
-                ],
-                [2, col]
+                "\{row:" + 0 + ",col:" + 1 + "\}",
+                "\{row:" + 1 + ",col:" + 0 + "\}",
+                "\{row:" + 1 + ",col:" + 1 + "\}",
+                "\{row:" + 0 + ",col:" + col + "\}",
+                "\{row:" + 0 + ",col:" + (col - 1) + "\}",
+                "\{row:" + 0 + ",col:" + (col - 2) + "\}",
+                "\{row:" + 1 + ",col:" + col + "\}",
+                "\{row:" + 2 + ",col:" + col + "\}"
             ]);
-
-else {
+        else {
             return ([
-                [
-                    0, sqr[1] - 1
-                ],
-                [
-                    0, sqr[1] + 1
-                ],
-                [
-                    1, sqr[1] - 1
-                ],
-                [
-                    1, sqr[1]
-                ],
-                [
-                    1, sqr[1] + 1
-                ],
-                [
-                    row, sqr[1] - 1
-                ],
-                [
-                    row, sqr[1]
-                ],
-                [
-                    row, sqr[1] + 1
-                ]
+                "\{row:" + 0 + ",col:" + (sqr[1] - 1) + "\}",
+                "\{row:" + 0 + ",col:" + (sqr[1] + 1) + "\}",
+                "\{row:" + 1 + ",col:" + (sqr[1] - 1) + "\}",
+                "\{row:" + 1 + ",col:" + sqr[1] + "\}",
+                "\{row:" + 1 + ",col:" + (sqr[1] + 1) + "\}",
+                "\{row:" + row + ",col:" + (sqr[1] - 1) + "\}",
+                "\{row:" + row + ",col:" + sqr[1] + "\}",
+                "\{row:" + row + ",col:" + (sqr[1] + 1) + "\}"
             ]);
         }
     } else {
         if (sqr[1] == col) {
             return ([
-                [
-                    sqr[0] - 1,
-                    col
-                ],
-                [
-                    sqr[0] - 1,
-                    col - 1
-                ],
-                [
-                    sqr[0], col - 1
-                ],
-                [
-                    sqr[0] + 1,
-                    col - 1
-                ],
-                [
-                    sqr[0] + 1,
-                    col
-                ],
-                [
-                    sqr[0], 0
-                ],
-                [
-                    sqr[0] - 1,
-                    0
-                ],
-                [
-                    sqr[0], + 1
-                ]
+                "\{row:" + (sqr[0] - 1) + ",col:" + col + "\}",
+                "\{row:" + (sqr[0] - 1) + ",col:" + (col - 1) + "\}",
+                "\{row:" + sqr[0] + ",col:" + (col - 1) + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + (col - 1) + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + col + "\}",
+                "\{row:" + sqr[0] + ",col:" + 0 + "\}",
+                "\{row:" + (sqr[0] - 1) + ",col:" + 0 + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + 0 + "\}"
             ])
 
         } else if (sqr[1] == 0) {
             return ([
-                [
-                    sqr[0] - 1,
-                    0
-                ],
-                [
-                    sqr[0] + 1,
-                    0
-                ],
-                [
-                    sqr[0] - 1,
-                    1
-                ],
-                [
-                    sqr[0], 1
-                ],
-                [
-                    sqr[0] + 1,
-                    1
-                ],
-                [
-                    sqr[0] - 1,
-                    col
-                ],
-                [
-                    sqr[0], col
-                ],
-                [
-                    sqr[0] + 1,
-                    col
-                ]
+                "\{row:" + (sqr[0] - 1) + ",col:" + 0 + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + 0 + "\}",
+                "\{row:" + (sqr[0] - 1) + ",col:" + 1 + "\}",
+                "\{row:" + sqr[0] + ",col:" + 1 + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + 1 + "\}",
+                "\{row:" + (sqr[0] - 1) + ",col:" + col + "\}",
+                "\{row:" + sqr[0] + ",col:" + col + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + col + "\}"
             ]);
         } else {
             return ([
-                [
-                    sqr[0] - 1,
-                    sqr[1]
-                ],
-                [
-                    sqr[0] - 1,
-                    sqr[1] + 1
-                ],
-                [
-                    sqr[0], sqr[1] + 1
-                ],
-                [
-                    sqr[0] + 1,
-                    sqr[1] + 1
-                ],
-                [
-                    sqr[0] + 1,
-                    sqr[1]
-                ],
-                [
-                    sqr[0] + 1,
-                    sqr[1] - 1
-                ],
-                [
-                    sqr[0], sqr[1] - 1
-                ],
-                [
-                    sqr[0] - 1,
-                    sqr[1] - 1
-                ]
+                "\{row:" + (sqr[0] - 1) + ",col:" + sqr[1] + "\}",
+                "\{row:" + (sqr[0] - 1) + ",col:" + (sqr[1] + 1) + "\}",
+                "\{row:" + sqr[0] + ",col:" + (sqr[1] + 1) + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + (sqr[1] + 1) + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + sqr[1] + "\}",
+                "\{row:" + (sqr[0] + 1) + ",col:" + (sqr[1] - 1) + "\}",
+                "\{row:" + sqr[0] + ",col:" + (sqr[1] - 1) + "\}",
+                "\{row:" + (sqr[0] - 1) + ",col:" + (sqr[1] - 1) + "\}"
             ]);
         }
 
     }
-}
+};
 
-//</editor-fold>
+const AllNeibghbors = (alive, dimX, dimY) => List(alive.map(x => getSquareneighbors(sqrToarray(x), dimX, dimY)).reduce((a, b) => a.concat(b)));
+//some action types for redux
+let EF = () => {};
+let defaultState = Map({
+    grid: randomGrid_30x50,
+    Rows: 30,
+    Columns: 50,
+    viewbox: 100,
+    Run: EF,
+    Pause: EF,
+    Clear: EF,
+    generation: "0000",
+    To30x50: EF,
+    To50x70: EF,
+    To80x100: EF,
+    SlowSpeed: EF,
+    MediumSpeed: EF,
+    FastSpeed: EF
 
-const ChangeSquareStatus = (i, j) => { 
-}
-//<editor-fold>
-const randomGrid_30x50 = GenerateRandomGrid(30, 50, 10)
-const ADVANCE_GENERATION = "ADVANCE_GENERATION";
+});
+
 const CHANGE_SQUARE_STATUS = "CHANGE_SQUARE_STATUS";
 const RESET_SIMULATION = "RESET_SIMULATION";
 const PAUSE_SIMULATION = "PAUSE_SIMULATION";
 const RUN_SIMULATION = "RUN_SIMULATION";
 const CHANGE_SPEED = "CHANGE_SPEED";
-//</editor-fold>
-const ChangeSpeed = (speed) => {
-    return {type: CHANGE_SPEED, payload: speed}
+
+const ChangeGridSize = (Grid) => {
+    switch (Grid) {
+        case "30x50":
+            return "GRID_30X50"
+        case "50x80":
+            return "GRID_50X80"
+        case "80x100":
+            return "GRID_80X100"
+        default:
+            return "GRID_30X50"
+
+    }
+};
+/*
+StartSimulation = ()=>{
+while (SF==true)
+
+ }
+*/
+const AdvanceGeneration = () => {
+    return {type: 'ADVANCE_GENERATION'};
 }
 
-const SingleReducer(state, action) => {
+const CountOccurances = (x, list) => {
+    let counter = 0;
+    list.map(alpha => {
+        if (x == alpha)
+            n++;
+        }
+    );
+    return n;
+};
+
+const EvolutionReducer = (state, action) => {
     switch (action.type) {
-        case ADVANCE_GENERATION:
-          {
-              state.grid.map()
+        case 'ADVANCE_GENERATION':
+            const grid=state.get("grid");
+            const Rows = state.get("Rows");
+            const Columns = state.get("Columns")
+            let allNeibghbors = AllNeibghbors(grid, Rows, Columns);
+            let Ressurected = allNeibghbors.filter(x => !grid.contains(x)).filter(x => CountOccurances(x, grid) == 3);
+            let survived = allNeibghbors.filter(x => grid.contains(x)).filter(x => {
+                return CountOccurances(x, grid) == 3 || CountOccurances(x, grid) == 2
+            });
 
+            return state.update("grid",survived.merge(Ressurected));
 
-            break;
-                }
         default:
             return state
 
     }
 
-}
+};
 
-const List = Immutable.List;
-const deadgrid30x50 = Immutable.fromJS(_.times(30, () => {
-    return _.times(50, () => {
-        return "dead"
-    })
-}));
-
-const GenerateRandomGrid = (dimX, dimY, deathtol) => {
-
-    return Immutable.fromJS(_.times(dimX, () => {
-        return _.times(dimY, () => {
-            let rnd = _.random(0, 100);
-            if (rnd > deathtol)
-                return "dead"
-            else
-                return "alive"
-        })
-    }));
-}
-
+let tmp = AllNeibghbors(randomGrid_30x50);
+console.log(List.isList(tmp));
 const DrawGrid = (props) => {
-    //  console.log(props.viewbox);
-    // console.log(props.grid.size);
-    let width = props.measure;
-    //    console.log(List.isList(props.grid.get(0)));
-    let height = props.measure * (props.grid.size / props.grid.get(0).size);
-    let vH = props.viewbox * props.grid.size;
-    let vW = props.viewbox * props.grid.get(0).size;
-    let border = (vW / (10 * props.grid.size))
-    let side = (vW / props.grid.size) - border; // (vW / (0.1 * props.grid.size)) ;
+
+    let vH = props.viewbox * props.Rows;
+    let vW = props.viewbox * props.Columns;
+    let SpaceBetween = (props.viewbox * 0.1)
+    let side = (props.viewbox * 0.9);
     let viewBox = "0 0 " + vW + " " + vH;
-
-    //console.log("height: ", height);
-    //console.log("width: ", width);
-    //console.log("viewbox ", viewBox);
-    //console.log("side: ", side);
-    // width={width} height={height}
-
+    let GridRows = _.times(props.Rows, (n) => n);
+    let EmptyGrid = _.times(props.Columns, () => GridRows);
     return (
         <div id="cnt2">
             <UperControls/>
             <div id="grid-cnt">
-                <svg viewBox={viewBox} preserveAspectRatio="none">
-                    {props.grid.map((x, i) => {
-                        let yindex = i * (side + border);
-                        //console.
-                        return x.map((y, j) => {
-                            let id = "rect_" + i + "," + j;
-                            let xindex = j * (side + border);
-                            return (<rect className={y} id={id} key={id} width={side} height={side} x={xindex} y={yindex}/>);
+                <svg viewBox={viewBox}>
+                    {EmptyGrid.map((x, i) => {
+                        let yindex = i * (side + SpaceBetween);
+                        return x.map((y) => {
+                            let id = "\{" +
+                            "row:" + y + "," + "col:" + i + "\}";
+                            let xindex = y * (side + SpaceBetween);
+                            if (props.grid.contains(id)) {
+                                //console.log("mach found:", id);
+                                return (<rect className={"alive"} id={id} key={id} width={side} height={side} y={xindex} x={yindex}/>)
+                            } else
+                                return (<rect className={"dead"} id={id} key={id} width={side} height={side} x={yindex} y={xindex}/>)
+
                         });
-                    }).toArray()}
+                    })}
                 </svg>
             </div>
             <LowerControls/>
@@ -380,20 +266,20 @@ const UperControls = function(props) {
     return (
         <div id="controls-cnt">
             <div id="controls">
-                <div className="btn" o>
+                <div className="btn" onClick={props.Run}>
                     <p>{"RUN"}</p>
                 </div>
-                <div className="btn">
+                <div className="btn" onClick ={props.Pause}>
                     <p>{"PAUSE"}</p>
                 </div>
-                <div className="btn">
+                <div className="btn" onClick={props.Clear}>
                     <p>{"CLEAR"}</p>
                 </div>
             </div>
             <div id="display">
                 <div id="display-caption">
                     <p>
-                        Generation:
+                        Generation: {props.generation}
                     </p>
                 </div>
                 <div id="display-area"></div>
@@ -410,34 +296,33 @@ const LowerControls = function(props) {
     return (
         <div id="controls-cnt2">
             <div id="upper-sub-controls">
-                <div id="upper-caption">
+                <div id="upper-caption" className="noTextSelect">
                     <p>Board Size:</p>
                 </div>
 
-                <div className="btn">
+                <div className="btn" onClick={props.To30x50}>
                     <p>{"30x50"}</p>
                 </div>
-                <div className="btn">
+                <div className="btn" onClick={props.To50x70}>
                     <p>{"50x70"}</p>
                 </div>
-                <div className="btn">
+                <div className="btn" onClick={props.To80x100}>
                     <p>{"80x100"}</p>
                 </div>
 
             </div>
             <div id="lower-sub-controls">
-                <div id="lower-caption">
-                    <p>Sim Speed:
-                    </p>
+                <div id="lower-caption" className="noTextSelect">
+                    <p>Sim Speed:</p>
                 </div>
 
-                <div className="btn">
+                <div className="btn" onClick={props.SlowSpeed}>
                     <p>{"Slow"}</p>
                 </div>
-                <div className="btn">
+                <div className="btn" onClick={props.MediumSpeed}>
                     <p>{"Medium"}</p>
                 </div>
-                <div className="btn">
+                <div className="btn" onClick={props.FastSpeed}>
                     <p>{"Fast"}</p>
                 </div>
             </div>
@@ -446,5 +331,10 @@ const LowerControls = function(props) {
 
 }
 
+let store = Redux.createStore(EvolutionReducer,defaultState);
+
+
+
+
 ReactDOM.render(
-    <DrawGrid grid ={randomGrid_30x50} measure={500} viewbox={1000}/>, document.getElementById('cnt'));
+    <DrawGrid grid ={randomGrid_30x50} Rows={30} Columns={50} viewbox={100}/>, document.getElementById('cnt'));
