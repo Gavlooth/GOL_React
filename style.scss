@@ -1,0 +1,130 @@
+#cnt2 {
+    width: 100%;
+    background-color: lavender;
+    height: 100%;
+    padding: 5px 2% 25px;
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+}
+.dead {
+    fill: #0000ff;
+    fill-rule: evenodd;
+    stroke: #000000;
+    stroke-width: 1px;
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+    stroke-opacity: 1;
+}
+.alive {
+    @extend .alive;
+    fill: #870010;
+}
+#controls-cnt {
+    width: 500px;
+    height: 40px;
+    border-radius: 20px;
+    display: flex;
+    flex-flow: row;
+    background-color: #2B1B17;
+    color: lavender;
+}
+#controls {
+    width: 70%;
+    height: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+#display {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    width: 30%;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+#grid-cnt {
+    width: 500px;
+    height: 300px;
+    border: 2px solid black;
+    padding: 20px;
+    background-color: #2B1B17;
+    border-radius: 20px;
+
+}
+.btn {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    text-align: center;
+    background: #966F33;
+    border-radius: 10px;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 10px;
+    width: 60px;
+    height: 20px;
+    text-decoration: none;
+    line-height: 70%;
+    cursor: default;
+    padding-bottom: 3px;
+}
+.btn:hover {
+    background: #DCB579;
+    background-image: -webkit-linear-gradient(top, #DCB579, #BDA65B);
+    background-image: -moz-linear-gradient(top, #DCB579, #BDA65B);
+    background-image: -ms-linear-gradient(top, #DCB579, #BDA65B);
+    background-image: -o-linear-gradient(top, #DCB579, #BDA65B);
+    background-image: linear-gradient(to bottom, #DCB579, #BDA65B);
+    text-decoration: none;
+}
+#display-caption {
+    text-align: center;
+    height: 100%;
+    font-size: 70%;
+    cursor: default;
+}
+#display-area {
+    background-color: white;
+    width: 40%;
+    height: 60%;
+    border-radius: 10%;
+    color: black;
+}
+#controls-cnt2 {
+    width: 400px;
+    height: 100px;
+    overflow: hidden;
+
+    display: flex;
+    flex-flow: column;
+    background-color: #2B1B17;
+    align-items: center;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+#lower-sub-controls,
+#upper-sub-controls {
+    height: 50%;
+    width: 100%;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    margin: 0;
+    background-color: #2B1B17;
+    color: lavender;
+}
