@@ -1,340 +1,411 @@
+const Map = Immutable.Map;
+const connect = ReactRedux.connect;
+const Provider = ReactRedux.Provider;
+const MeasurePerformance = (str, func) => {
+    let t01 = performance.now();
 
-const List = Immutable.List;
-const Map=Immutable.Map;
+    let tmp = (() => {
 
-//operations on squares
-let SW = false;
-const GenerateRandomGrid = (dimX, dimY, deathtol) => {
-    let tmpArr = [];
-    for (let i = 0; i < dimX; i++)
-        for (let j = 0; j < dimY; j++)
-            if (_.random(0, 100) <= deathtol)
+        let result = func();
+        return {result: result, t02: performance.now()}
+    })();
+    console.log(str, tmp.t02 - t01);
+    return tmp.result;
 
-                tmpArr.push("\{" +
-                    "row:" + i + "," + "col:" + j + "\}");
-
-    return List(tmpArr);
 }
-const randomGrid_30x50 = GenerateRandomGrid(30, 50, 10); //start with a grid 10% alive
+const Evolve = function(grid = []) {
+    let Dimensions = {
+        X: grid[0].length,
+        Y: grid.length
+    };
 
+    const SumSquareNeighbors = (x, y) => {
+        const DimX = Dimensions.X - 1;
+        const DimY = Dimensions.Y - 1;
+        let above = x - 1 < 0
+            ? (DimY)
+            : x - 1;
+        let bellow = (x === DimY)
+            ? 0
+            : x + 1;
+        let left = y - 1 < 0
+            ? (DimX)
+            : y - 1;
+        let right = (y === DimX)
+            ? 0
+            : y + 1;
 
-const sqrToarray = (sqr) => {
-    let tmp = sqr.split(",");
+        return grid[above][left] + grid[above][y] + grid[above][right] + grid[x][left] + grid[x][right] + grid[bellow][left] + grid[bellow][y] + grid[bellow][right];
 
-    tmp[0] = parseInt(tmp[0].slice(5));
-    tmp[1] = parseInt(tmp[1].slice(4).slice(0, -1));
-    return tmp;
-};
-// get list with nearest squares
-const getSquareneighbors = (sqr, row, col) => {
-    row = row - 1;
-    col = col - 1
+    };
 
-    if (sqr[0] == row) {
-        if (sqr[1] == col)
-            return ([
-                "\{row:" + row + ",col:" + 0 + "\}",
-                "\{row:" + (row - 1) + ",col:" + 0 + "\}",
-                "\{row:" + (row - 2) + ",col:" + 0 + "\}",
-                "\{row:" + row + ",col:" + 1 + "\}",
-                "\{row:" + row + ",col:" + 2 + "\}",
-                "\{row:" + (row - 1) + ",col:" + col + "\}",
-                "\{row:" + (row - 1) + ",col:" + (col - 1) + "\}",
-                "\{row:" + row + ",col:" + (col - 1) + "\}"
-            ])
-        else if (sqr[1] == 0)
-            return ([
-                "\{row:" + row + ",col:" + 1 + "\}",
-                "\{row:" + (row - 1) + ",col:" + 1 + "\}",
-                "\{row:" + (row - 1) + ",col:" + 0 + "\}",
-                "\{row:" + row + ",col:" + col + "\}",
-                "\{row:" + (row - 1) + ",col:" + col + "\}",
-                "\{row:" + (row - 2) + ",col:" + col + "\}",
-                "\{row:" + row + ",col:" + (col - 1) + "\}",
-                "\{row:" + row + ",col:" + (col - 2) + "\}"
+    return grid.map((row, i) => row.map((sqr, j) => {
+        //let IsAlive = grid[i][j];
+        let SumOfAlive = SumSquareNeighbors(i, j);
+        switch (sqr) {
+            case 1:
+                if (SumOfAlive == 3 || SumOfAlive == 2)
+                    return 1;
+                else
+                    return 0;
+                case 0:
+                if (SumOfAlive === 3)
+                    return 1;
+                else
+                    return 0;
 
-            ]);
-        else
-            return ([
-                "\{row:" + (row - 1) + ",col:" + (sqr[1] - 1) + "\}",
-                "\{row:" + (row - 1) + ",col:" + sqr[1] + "\}",
-                "\{row:" + (row - 1) + ",col:" + (sqr[1] + 1) + "\}",
-                "\{row:" + row + ",col:" + (sqr[1] - 1) + "\}",
-                "\{row:" + row + ",col:" + (sqr[1] + 1) + "\}",
-                "\{row:" + 0 + ",col:" + (sqr[1] - 1) + "\}",
-                "\{row:" + 0 + ",col:" + sqr[1] + "\}",
-                "\{row:" + 0 + ",col:" + (sqr[1] + 1) + "\}"
-            ]);
-        }
-
-    if (sqr[0] == 0) {
-        if (sqr[1] == col)
-            return ([
-                "\{row:" + 1 + ",col:" + col + "\}",
-                "\{row:" + 1 + ",col:" + (col - 1) + "\}",
-                "\{row:" + 0 + ",col:" + (col - 1) + "\}",
-                "\{row:" + 0 + ",col:" + 0 + "\}",
-                "\{row:" + 0 + ",col:" + 1 + "\}",
-                "\{row:" + 0 + ",col:" + 2 + "\}",
-                "\{row:" + 1 + ",col:" + 0 + "\}",
-                "\{row:" + 2 + ",col:" + 0 + "\}"
-            ]);
-        else if (sqr[1] == 0)
-            return ([
-                "\{row:" + 0 + ",col:" + 1 + "\}",
-                "\{row:" + 1 + ",col:" + 0 + "\}",
-                "\{row:" + 1 + ",col:" + 1 + "\}",
-                "\{row:" + 0 + ",col:" + col + "\}",
-                "\{row:" + 0 + ",col:" + (col - 1) + "\}",
-                "\{row:" + 0 + ",col:" + (col - 2) + "\}",
-                "\{row:" + 1 + ",col:" + col + "\}",
-                "\{row:" + 2 + ",col:" + col + "\}"
-            ]);
-        else {
-            return ([
-                "\{row:" + 0 + ",col:" + (sqr[1] - 1) + "\}",
-                "\{row:" + 0 + ",col:" + (sqr[1] + 1) + "\}",
-                "\{row:" + 1 + ",col:" + (sqr[1] - 1) + "\}",
-                "\{row:" + 1 + ",col:" + sqr[1] + "\}",
-                "\{row:" + 1 + ",col:" + (sqr[1] + 1) + "\}",
-                "\{row:" + row + ",col:" + (sqr[1] - 1) + "\}",
-                "\{row:" + row + ",col:" + sqr[1] + "\}",
-                "\{row:" + row + ",col:" + (sqr[1] + 1) + "\}"
-            ]);
-        }
-    } else {
-        if (sqr[1] == col) {
-            return ([
-                "\{row:" + (sqr[0] - 1) + ",col:" + col + "\}",
-                "\{row:" + (sqr[0] - 1) + ",col:" + (col - 1) + "\}",
-                "\{row:" + sqr[0] + ",col:" + (col - 1) + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + (col - 1) + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + col + "\}",
-                "\{row:" + sqr[0] + ",col:" + 0 + "\}",
-                "\{row:" + (sqr[0] - 1) + ",col:" + 0 + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + 0 + "\}"
-            ])
-
-        } else if (sqr[1] == 0) {
-            return ([
-                "\{row:" + (sqr[0] - 1) + ",col:" + 0 + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + 0 + "\}",
-                "\{row:" + (sqr[0] - 1) + ",col:" + 1 + "\}",
-                "\{row:" + sqr[0] + ",col:" + 1 + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + 1 + "\}",
-                "\{row:" + (sqr[0] - 1) + ",col:" + col + "\}",
-                "\{row:" + sqr[0] + ",col:" + col + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + col + "\}"
-            ]);
-        } else {
-            return ([
-                "\{row:" + (sqr[0] - 1) + ",col:" + sqr[1] + "\}",
-                "\{row:" + (sqr[0] - 1) + ",col:" + (sqr[1] + 1) + "\}",
-                "\{row:" + sqr[0] + ",col:" + (sqr[1] + 1) + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + (sqr[1] + 1) + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + sqr[1] + "\}",
-                "\{row:" + (sqr[0] + 1) + ",col:" + (sqr[1] - 1) + "\}",
-                "\{row:" + sqr[0] + ",col:" + (sqr[1] - 1) + "\}",
-                "\{row:" + (sqr[0] - 1) + ",col:" + (sqr[1] - 1) + "\}"
-            ]);
-        }
+                }
+            }));
 
     }
-};
+    let SW = false;
+    const GenerateRandomGrid = (dimX, dimY, deathtoll) => {
+        const RessurectRandom = () => (_.random(0, 100) <= deathtoll)
+            ? 1
+            : 0;
 
-const AllNeibghbors = (alive, dimX, dimY) => List(alive.map(x => getSquareneighbors(sqrToarray(x), dimX, dimY)).reduce((a, b) => a.concat(b)));
-//some action types for redux
-let EF = () => {};
-let defaultState = Map({
-    grid: randomGrid_30x50,
-    Rows: 30,
-    Columns: 50,
-    viewbox: 100,
-    Run: EF,
-    Pause: EF,
-    Clear: EF,
-    generation: "0000",
-    To30x50: EF,
-    To50x70: EF,
-    To80x100: EF,
-    SlowSpeed: EF,
-    MediumSpeed: EF,
-    FastSpeed: EF
+        return _.times(dimY, () => _.times(dimX, RessurectRandom));
 
-});
+    };
+    const randomGrid_30x50 = GenerateRandomGrid(30, 50, 30);
 
-const CHANGE_SQUARE_STATUS = "CHANGE_SQUARE_STATUS";
-const RESET_SIMULATION = "RESET_SIMULATION";
-const PAUSE_SIMULATION = "PAUSE_SIMULATION";
-const RUN_SIMULATION = "RUN_SIMULATION";
-const CHANGE_SPEED = "CHANGE_SPEED";
+    const SpaceBetween = 10;
+    const side = 90;
+    const viewBox = "0 0 5000 3000";
 
-const ChangeGridSize = (Grid) => {
-    switch (Grid) {
-        case "30x50":
-            return "GRID_30X50"
-        case "50x80":
-            return "GRID_50X80"
-        case "80x100":
-            return "GRID_80X100"
-        default:
-            return "GRID_30X50"
+    const SetLoopSpeed = (speed) => {
+        switch (speed) {
+            case "PAUSE":
+                return {type: "PAUSE"}
+            case "SLOW":
+                return {type: "CHANGE_SPEED", payload: 200}
+            case "FAST":
+                return {type: "CHANGE_SPEED", payload: 50}
 
-    }
-};
-/*
-StartSimulation = ()=>{
-while (SF==true)
-
- }
-*/
-const AdvanceGeneration = () => {
-    return {type: 'ADVANCE_GENERATION'};
-}
-
-const CountOccurances = (x, list) => {
-    let counter = 0;
-    list.map(alpha => {
-        if (x == alpha)
-            n++;
         }
-    );
-    return n;
-};
-
-const EvolutionReducer = (state, action) => {
-    switch (action.type) {
-        case 'ADVANCE_GENERATION':
-            const grid=state.get("grid");
-            const Rows = state.get("Rows");
-            const Columns = state.get("Columns")
-            let allNeibghbors = AllNeibghbors(grid, Rows, Columns);
-            let Ressurected = allNeibghbors.filter(x => !grid.contains(x)).filter(x => CountOccurances(x, grid) == 3);
-            let survived = allNeibghbors.filter(x => grid.contains(x)).filter(x => {
-                return CountOccurances(x, grid) == 3 || CountOccurances(x, grid) == 2
-            });
-
-            return state.update("grid",survived.merge(Ressurected));
-
-        default:
-            return state
-
     }
 
-};
+    const Id2Coords = (sqr) => {
+        let tmp = sqr.split(",");
 
-let tmp = AllNeibghbors(randomGrid_30x50);
-console.log(List.isList(tmp));
-const DrawGrid = (props) => {
+        tmp[0] = parseInt(tmp[0].slice(5));
+        tmp[1] = parseInt(tmp[1].slice(4).slice(0, -1));
+        return {row: tmp[0], column: tmp[1]};
+    };
 
-    let vH = props.viewbox * props.Rows;
-    let vW = props.viewbox * props.Columns;
-    let SpaceBetween = (props.viewbox * 0.1)
-    let side = (props.viewbox * 0.9);
-    let viewBox = "0 0 " + vW + " " + vH;
-    let GridRows = _.times(props.Rows, (n) => n);
-    let EmptyGrid = _.times(props.Columns, () => GridRows);
-    return (
-        <div id="cnt2">
-            <UperControls/>
-            <div id="grid-cnt">
-                <svg viewBox={viewBox}>
-                    {EmptyGrid.map((x, i) => {
+    const ChangeGridSize = (Grid) => {
+        switch (Grid) {
+            case "30x50":
+                return {
+                    type: 'CHANGE_GRID_DIMENSIONS',
+                    payload: {
+                        DimX: 30,
+                        DimY: 50,
+                        boardSize: "_30x50"
+                    }
+                }
+            case "40x80":
+                return {
+                    type: 'CHANGE_GRID_DIMENSIONS',
+                    payload: {
+                        DimX: 40,
+                        DimY: 80,
+                        boardSize: "_40x80"
+                    }
+                }
+
+            default:
+                return {
+                    type: 'CHANGE_GRID_DIMENSIONS',
+                    payload: {
+                        DimX: 30,
+                        DimY: 50,
+                        boardSize: "_30x50"
+
+                    }
+                }
+
+        }
+    };
+    const ClearGrid = () => {
+        return {type: 'CLEAR_GRID'}
+    };
+    const AdvanceGeneration = () => {
+        return {type: 'ADVANCE_GENERATION'};
+    }
+    const TurnSquare = (sqr) => {
+        return {type: 'FLIP_SQUARE', payload: sqr}
+    }
+
+    const SingleReducer = (state, action) => {
+
+        switch (action.type) {
+            case 'ADVANCE_GENERATION':
+                const population = parseInt(state.get("generation"), 10);
+                const padToFour = (number) => {
+                    number++;
+                    if (number <= 99999) {
+                        number = ("0000" + number).slice(-5);
+                    }
+                    return number;
+                };
+                return state.withMutations(map => map.set("grid", Evolve(state.get("grid"))).set("generation", padToFour(population)));
+            case 'CHANGE_SPEED':
+                loop.Clear();
+                return state.set("speed", action.payload)
+            case 'CHANGE_GRID_DIMENSIONS':
+                let viewBox = "0 0 " + (action.payload.DimY * 100) + " " + (action.payload.DimX * 100);
+                let newGrid = GenerateRandomGrid(action.payload.DimX, action.payload.DimY, 30);
+                return state.withMutations(map => map.set("grid", newGrid).set("generation", "00000").set("viewBox", viewBox).set("boardSize", action.payload.boardSize));
+            case "CLEAR_GRID":
+                let EmptyGrid = GenerateRandomGrid(state.get("grid")[0].length, state.get("grid").length, -1);
+                loop.Clear();
+                return state.withMutations(map => map.set("grid", EmptyGrid).set("generation", "00000"));
+            case 'PAUSE':
+                loop.Clear();
+                return state;
+            case 'FLIP_SQUARE':
+                let square = Id2Coords(action.payload);
+                let tmpArr = state.get("grid").map(x => x.slice(0));
+                let skata  = tmpArr[square.column][square.row] === 0
+                    ? 1
+                    : 0;
+                tmpArr[square.column][square.row]=skata;
+                return state.set("grid", tmpArr)
+            default:
+                return state;
+
+        }
+    };
+
+    const Square = ({
+        status,
+        id,
+        side,
+        vertical,
+        horizontal,
+        FlipSquare
+    }) => <rect className={status} id={id} key={id} width={side} height={side} x={horizontal} y={vertical} onClick ={FlipSquare(id)}/>
+
+    const Grid = ({
+        SpaceBetween,
+        side,
+        viewBox,
+        grid,
+        boardSize,
+        FlipSquare,
+        Pause
+    }) => {
+
+        return (
+
+            <div id="grid-cnt" className={boardSize}>
+                <svg viewBox={viewBox} preserveAspectRatio="none">
+                    {grid.map((x, i) => {
                         let yindex = i * (side + SpaceBetween);
-                        return x.map((y) => {
+                        return x.map((y, j) => {
                             let id = "\{" +
-                            "row:" + y + "," + "col:" + i + "\}";
-                            let xindex = y * (side + SpaceBetween);
-                            if (props.grid.contains(id)) {
-                                //console.log("mach found:", id);
-                                return (<rect className={"alive"} id={id} key={id} width={side} height={side} y={xindex} x={yindex}/>)
-                            } else
-                                return (<rect className={"dead"} id={id} key={id} width={side} height={side} x={yindex} y={xindex}/>)
+                            "row:" + j + "," + "col:" + i + "\}";
+                            let status = (y === 1)
+                                ? "alive"
+                                : "dead";
+                            let xindex = j * (side + SpaceBetween);
+                            return <Square status={status} id={id} side={side} horizontal={yindex} vertical={xindex} FlipSquare={FlipSquare}/>
 
                         });
                     })}
                 </svg>
             </div>
-            <LowerControls/>
-        </div>
-    );
+        );
+    };
 
-};
+    let HasAlive = (grid) => {
+        let thereIsAlive = 0;
+        for (let i = 0; i < grid.length; i++)
+            for (let j = 0; j < grid[0].length; j++)
+                if (grid[i][j] > 0)
+                    thereIsAlive++;
+    return thereIsAlive;
 
-const UperControls = function(props) {
+    }
 
-    return (
-        <div id="controls-cnt">
-            <div id="controls">
-                <div className="btn" onClick={props.Run}>
-                    <p>{"RUN"}</p>
+    class DrawGrid extends React.Component {
+        componentDidMount() {
+            this.Run();
+        }
+
+        Run() {
+            let hasAlive = HasAlive(this.props.grid);
+
+            if (hasAlive > 0) {
+                if (loop.interval === null)
+                    loop.Start();
+                }
+            else if (this.props.grid.length == 80) {
+                this.props.To40x80();
+                loop.Start();
+            } else {
+                this.props.To30x50();
+                loop.Start();
+            }
+
+        }
+
+        render() {
+            return (
+                <div id="cnt2">
+                    <UperControls Run={() => this.Run()} Pause={this.props.Pause} Clear={this.props.Clear} generation={this.props.generation}/>
+                    <Grid SpaceBetween={this.props.SpaceBetween} side={this.props.side} viewBox={this.props.viewBox} GridRows={this.props.GridRows} grid={this.props.grid} boardSize={this.props.boardSize} FlipSquare={this.props.ChangeSquare}/>
+                    <LowerControls To30x50={this.props.To30x50} To40x80 ={this.props.To40x80} SlowSpeed={() => {
+                        let check = (loop.interval == null);
+                        this.props.SlowSpeed();
+                        if (!check)
+                            this.Run();
+                        }} FastSpeed={() => {
+                        let check = (loop.interval == null);
+                        this.props.FastSpeed();
+                        if (!check)
+                            this.Run();
+                        }}/>
                 </div>
-                <div className="btn" onClick ={props.Pause}>
-                    <p>{"PAUSE"}</p>
+            )
+        }
+
+    };
+
+    const UperControls = function(props) {
+
+        return (
+            <div id="controls-cnt">
+                <div id="controls">
+                    <div className="btn" onClick={props.Run}>
+                        <p>{"RUN"}</p>
+                    </div>
+                    <div className="btn" onClick ={props.Pause}>
+                        <p>{"PAUSE"}</p>
+                    </div>
+                    <div className="btn" onClick={props.Clear}>
+                        <p>{"CLEAR"}</p>
+                    </div>
                 </div>
-                <div className="btn" onClick={props.Clear}>
-                    <p>{"CLEAR"}</p>
+                <div id="display">
+                    <div id="display-caption">
+                        <p>
+                            Generation:
+                        </p>
+                    </div>
+                    <div id="display-area">
+                        {props.generation}</div>
+
+                </div>
+
+            </div>
+        )
+
+    };
+
+    const LowerControls = function(props) {
+
+        return (
+            <div id="controls-cnt2">
+                <div id="upper-sub-controls">
+                    <div id="upper-caption" className="noTextSelect">
+                        <p>Board Size:</p>
+                    </div>
+
+                    <div className="btn" onClick={props.To30x50}>
+                        <p>{"30x50"}</p>
+                    </div>
+                    <div className="btn" onClick={props.To40x80}>
+                        <p>{"40x80"}</p>
+                    </div>
+
+                </div>
+                <div id="lower-sub-controls">
+                    <div id="lower-caption" className="noTextSelect">
+                        <p>Sim Speed</p>
+                    </div>
+
+                    <div className="btn" onClick={props.SlowSpeed}>
+                        <p>{"Slow"}</p>
+                    </div>
+
+                    <div className="btn" onClick={props.FastSpeed}>
+                        <p>{"Fast"}</p>
+                    </div>
                 </div>
             </div>
-            <div id="display">
-                <div id="display-caption">
-                    <p>
-                        Generation: {props.generation}
-                    </p>
-                </div>
-                <div id="display-area"></div>
+        )
 
-            </div>
+    }
+    const defaultState = Map({
+        speed: 250,
+        boardSize: "_30x50",
+        grid: randomGrid_30x50,
+        viewBox: viewBox,
+        SpaceBetween: SpaceBetween,
+        side: side,
+        generation: "0000"
+    });
 
-        </div>
-    )
+    let store = Redux.createStore(SingleReducer, defaultState);
 
-};
+    let loop = {
+        interval: null,
+        Start: () => {
+            let speed = store.getState().get("speed");
 
-const LowerControls = function(props) {
+            let interval = setInterval(() => store.dispatch(AdvanceGeneration()), speed);
+            loop.interval = interval;
+        },
+        Clear: () => {
+            clearInterval(loop.interval);
+            loop.interval = null;
+        }
+    };
 
-    return (
-        <div id="controls-cnt2">
-            <div id="upper-sub-controls">
-                <div id="upper-caption" className="noTextSelect">
-                    <p>Board Size:</p>
-                </div>
+    const mapStateToProps = (state) => {
+        return {
+            boardSize: state.get("boardSize"),
+            SpaceBetween: state.get("SpaceBetween"),
+            side: state.get("side"),
+            viewBox: state.get("viewBox"),
+            grid: state.get("grid"),
+            generation: state.get("generation"),
+            speed: state.get("speed")
+        }
+    }
 
-                <div className="btn" onClick={props.To30x50}>
-                    <p>{"30x50"}</p>
-                </div>
-                <div className="btn" onClick={props.To50x70}>
-                    <p>{"50x70"}</p>
-                </div>
-                <div className="btn" onClick={props.To80x100}>
-                    <p>{"80x100"}</p>
-                </div>
+    const mapDispatchToProps = (dispatch) => {
+        return {
 
-            </div>
-            <div id="lower-sub-controls">
-                <div id="lower-caption" className="noTextSelect">
-                    <p>Sim Speed:</p>
-                </div>
+            To30x50: () => dispatch(ChangeGridSize("30x50")),
+            To40x80: () => dispatch(ChangeGridSize("40x80")),
 
-                <div className="btn" onClick={props.SlowSpeed}>
-                    <p>{"Slow"}</p>
-                </div>
-                <div className="btn" onClick={props.MediumSpeed}>
-                    <p>{"Medium"}</p>
-                </div>
-                <div className="btn" onClick={props.FastSpeed}>
-                    <p>{"Fast"}</p>
-                </div>
-            </div>
-        </div>
-    )
+            Clear: () => {
+                dispatch(ClearGrid())
+            },
+            SlowSpeed: () => dispatch(SetLoopSpeed("SLOW")),
+            FastSpeed: () => dispatch(SetLoopSpeed("FAST")),
+            ChangeSquare: (sqr) => {
+                return () => dispatch(TurnSquare(sqr))
+            },
+            Pause: () => dispatch(SetLoopSpeed("PAUSE"))
+        }
 
-}
+    };
 
-let store = Redux.createStore(EvolutionReducer,defaultState);
+    let ReduxGrid = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(DrawGrid);
+    ReactDOM.render(
+        <Provider store={store}>
+        <ReduxGrid/>
+    </Provider>, document.getElementById('cnt'));
 
-
-
-
-ReactDOM.render(
-    <DrawGrid grid ={randomGrid_30x50} Rows={30} Columns={50} viewbox={100}/>, document.getElementById('cnt'));
+    /*            function myLoop(i) {
+                    setTimeout(function() {
+                        alert('hello'); //  your code here
+                        if (--i)
+                            myLoop(i); //  decrement i and call myLoop again if i > 0
+                        }
+                    , 3000)
+                }(10);*/

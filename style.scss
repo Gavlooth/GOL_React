@@ -53,14 +53,30 @@
     user-select: none;
 }
 #grid-cnt {
-    width: 500px;
-    height: 300px;
+    width: auto;
+
     border: 2px solid black;
     padding: 20px;
     background-color: #2B1B17;
     border-radius: 20px;
 
+
 }
+  ._30x50  {
+    width: 500px!important;
+    height: 300px!important;
+
+}
+
+._40x80 {
+  width: 700px!important;
+  height: 350px!important;
+
+
+}
+
+
+
 .btn {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
